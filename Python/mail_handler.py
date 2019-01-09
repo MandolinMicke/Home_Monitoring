@@ -1,10 +1,13 @@
-import sys
+# -*- coding: utf-8 -*-
+
+#import sys
 import imaplib
 import smtplib
 
 import email
 import email.header
-import datetime
+#import datetime
+
 
 import mailcreds as mc
 
@@ -16,15 +19,13 @@ SMTP_PORT   = 993
 
 
 
-
-
 # -------------------------------------------------
 #
 # Utility to read email from Gmail Using Python
 #
 # ------------------------------------------------
 
-def read_email_from_gmail(user):
+def read_email_from_gmail(subject = None, user = 'tarendo'):
     mail = imaplib.IMAP4_SSL(SMTP_SERVER)
     mail.login(mc.EMAIL[user],mc.PWD[user])
     mail.select('inbox')
@@ -33,8 +34,11 @@ def read_email_from_gmail(user):
     mail.select("inbox") # connect to inbox.
 
     # Get all unread emails
-    typ, msg_num = mail.search(None,'(UNSEEN)')#'ALL')#(UNSEEN)')
-    
+    if subject == None:
+        typ, msg_num = mail.search(None,'(UNSEEN)')
+    else:
+        typ, msg_num = mail.search(None,'(UNSEEN SUBJECT "' + subject + ' ")')
+        
     # check if a new mail is here and get the text
     if msg_num[0].decode().split(' ')[0]:
         rettext = []
@@ -42,8 +46,8 @@ def read_email_from_gmail(user):
             result, data = mail.fetch(num.encode(), '(RFC822)')
             raw_email = data[0][1].decode()
             email_message = email.message_from_string(raw_email)
-            maintype = email_message.get_content_maintype()
-            mejltext = email_message.get_payload()[0].get_payload()
+#            maintype = email_message.get_content_maintype()
+            mejltext = email_message.get_payload()
             rettext.append(mejltext)
     else:
         rettext = None
@@ -55,35 +59,33 @@ def decodeMail(text):
     for i in text:
         stringlist = i.split('\n')
         for s in stringlist:
-            if any([x in s for x in sc.searchablecommands]):
+            if any([x in s for x in sc.systemcommands]):
                 strs = s.strip().split(' ')
                 retcommands[strs[0]] = strs[1]
-                
-          # print([x for x in stringlist if x in sc.searchablecommands])
     return retcommands
 
 
-def sendEmail(body,fromaddr,toaddr):
+def sendEmail(body,fromaddr,toaddr,subject):
 
     sent_from = mc.EMAIL[fromaddr]
-    to = [mc.EMAIL[toaddr]]   
+    to = [mc.EMAIL[toaddr]]
 
-    # print(email_text)
-    # try:  
-    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-    server.ehlo()
-    server.login(mc.EMAIL[fromaddr],mc.PWD[fromaddr])
-    server.sendmail(sent_from, to, body)
-    server.close()
-
-        # print('Email sent!')
-    # except:  
-        # print('Something went wrong...')
+    try:  
+        message = 'Subject: {}\n\n{}'.format(subject, body)   
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(mc.EMAIL[fromaddr],mc.PWD[fromaddr])
+        server.sendmail(sent_from, to, message)
+        server.close()
+        print('Email sent!')
+    except:  
+        print('Something went wrong...')
 if __name__ == '__main__':
-    # text = read_email_from_gmail()
-    # if text != None:
-        # print(decodeMail(text))
-    sendEmail('hej har kommer ett mejl med grejs','tarendo','system')
+     text = read_email_from_gmail('GUI', 'tarendo')
+     
+     if text != None:
+         print(decodeMail(text))
+#    sendEmail('hej hopp','tarendo','system')
 
 
 

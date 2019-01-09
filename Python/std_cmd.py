@@ -1,13 +1,25 @@
 # standard commands
 
-# set min temp
-searchablecommands = [
+systemcommands = [
+# system commands
+'getStatus',
 'setMinTemp',
 'setMaxTemp',
-'getStatus',
-'getTemp',
 'turnRadiatorOn',
 'turnRadiatorOff',
+'turnHeatCordOn',
+'turnHeatCordOff',
+'turnExtraOn',
+'turnExtraOff',
 'getLastWeeksData',
-'getLastMonthData'
+'getLastMonthData',
+### gui commands
+'extra',
+'heat_cord',
+'max_temp',
+'min_temp',
+'radiator',
+'room_temp',
+'pipe_temp',
+'humidity'
 ]
