@@ -214,7 +214,6 @@ class runner:
             commands = mailh.decodeMail(text)
             if commands != None:
                 self.executeCommands(commands)
-            self.sendStatus()
 
     def executeCommands(self,commands):
         for k, value in commands.items():
@@ -230,17 +229,17 @@ class runner:
                 # self.getStatus()
                 self.sendEmail('somestuffs')
             elif k == 'radiatorControl':
-                if bool(value):
+                if value == 'True':
                     self.turnRadiatorOn()
                 else:
                     self.turnRadiatorOff()    
             elif k == 'heatCordControl':
-                if bool(value):
+                if value == 'True':
                     self.turnHeatCordOn()
                 else:
                     self.turnHeatCordOff()    
             elif k == 'extraControl':
-                if bool(value):
+                if value == 'True':
                     self.turnExtraOn()
                 else:
                     self.turnExtraOff()    
