@@ -163,6 +163,8 @@ class MainWindow(Frame):
         m += 'heatCordControl ' + str(bool(mw.heatcord.get())) + '\n'
         m += 'extraControl ' + str(bool(mw.extra.get()))
         mailh.sendEmail(m,'tarendo','tarendo','system')
+        self.after(1000,self.checkUpdates)
+        
     def getStatus(self):
         self.status_string.set("Hämtar data, var god vänta...")
         mailh.sendEmail('getStatus True\n','tarendo','tarendo','system')

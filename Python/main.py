@@ -174,13 +174,13 @@ class runner:
         logger.info('Turning on heat cord')
         # self.ardu.turnHeatCordOn()
 #        self.sendEmail('Turning off Heat Cord')
-        self.status.setData('head_cord', True)
+        self.status.setData('heat_cord', True)
     
     def turnHeatCordOff(self):
         logger.info('Turning on heat cord')
         # self.ardu.turnHeatCordOn()
 #        self.sendEmail('Turning off Heat Cord')
-        self.status.setData('head_cord', False)
+        self.status.setData('heat_cord', False)
         
     def turnExtraOn(self):
         logger.info('Turning on heat cord')
