@@ -119,19 +119,19 @@ class runner:
         
     def startup(self):
         if self.status.data['radiator'] or (self.roomtemp < self.status.data['min_temp']):
-            self.turnOnRadiator()
+            self.turnRadiatorOn()
         else:
-            self.turnOffRadiator()
+            self.turnRadiatorOff()
         
         if self.status.data['heat_cord']:
-            self.turnOnHeatCord()
+            self.turnHeatCordOn()
         else:
-            self.turnOffHeatCord()
+            self.turnHeatCordOff()
             
         if self.status.data['extra']:
-            self.turnOnExtra()
+            self.turnExtraOn()
         else:
-            self.turnOffExtra()
+            self.turnExtraOff()
 
     def getfejkstatus(self):
         if self.roomtemp <4 or self.fejk:
@@ -154,41 +154,41 @@ class runner:
 #        print(self.status.data['radiator'])
 
         if (self.roomtemp < self.status.data['min_temp']) and not self.status.data['radiator']:
-            self.turnOnRadiator()
+            self.turnRadiatorOn()
         elif (self.roomtemp > self.status.data['max_temp']) and self.status.data['radiator']:
-            self.turnOffRadiator()
+            self.turnRadiatorOff()
 
-    def turnOnRadiator(self):
+    def turnRadiatorOn(self):
         logger.info(gts() + 'Turning on radiator')
         # self.ardu.turnCellarRadiatorOn()
 #        self.sendEmail('Turning on Radiator')
         self.status.setData('radiator', True)
         
-    def turnOffRadiator(self):
+    def turnRadiatorOff(self):
         logger.info('Turning off radiator')
         # self.ardu.turnCellarRadiatorOff()
 #        self.sendEmail('Turning off Radiator')
         self.status.setData('radiator', False)
     
-    def turnOnHeatCord(self):
+    def turnHeatCordOn(self):
         logger.info('Turning on heat cord')
         # self.ardu.turnHeatCordOn()
 #        self.sendEmail('Turning off Heat Cord')
         self.status.setData('head_cord', True)
     
-    def turnOffHeatCord(self):
+    def turnHeatCordOff(self):
         logger.info('Turning on heat cord')
         # self.ardu.turnHeatCordOn()
 #        self.sendEmail('Turning off Heat Cord')
         self.status.setData('head_cord', False)
         
-    def turnOnExtra(self):
+    def turnExtraOn(self):
         logger.info('Turning on heat cord')
         # self.ardu.turnExtraOn()
 #        self.sendEmail('Turning off Extra')
         self.status.setData('extra', True)
     
-    def turnOffExtra(self):
+    def turnExtraOff(self):
         logger.info('Turning on heat cord')
         # self.ardu.turnExtraOff()
 #        self.sendEmail('Turning off Extra')
@@ -209,7 +209,7 @@ class runner:
         self.sendEmail(m)
         
     def checkMail(self):
-        text = mailh.read_email_from_gmail('tarendo','GUI')
+        text = mailh.read_email_from_gmail('system')
         if text != None:
             commands = mailh.decodeMail(text)
             if commands != None:
@@ -229,10 +229,21 @@ class runner:
             elif k == 'getTemp':
                 # self.getStatus()
                 self.sendEmail('somestuffs')
-            elif k == 'turnRadiatorOn':
-                self.turnRadiatorOn()
-            elif k == 'turnRadiatorOff':
-                self.turnRadiatorOff()
+            elif k == 'radiatorControl':
+                if bool(value):
+                    self.turnRadiatorOn()
+                else:
+                    self.turnRadiatorOff()    
+            elif k == 'heatCordControl':
+                if bool(value):
+                    self.turnHeatCordOn()
+                else:
+                    self.turnHeatCordOff()    
+            elif k == 'extraControl':
+                if bool(value):
+                    self.turnExtraOn()
+                else:
+                    self.turnExtraOff()    
             elif k == 'getLastWeeksData':
                 pass
             elif k == 'getLastMonthData':
@@ -259,8 +270,10 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     
     logger.addFilter(my_filter)
+    logfile = '/home/pi/local/Home_Monitoring/logfile.log'
+#    logfile = 'D:/Tärendö/Home_Monitoring/logfile.log'
+    fh = logging.FileHandler(logfile)
     
-    fh = logging.FileHandler('D:/Tärendö/Home_Monitoring/logfile.log')
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
     

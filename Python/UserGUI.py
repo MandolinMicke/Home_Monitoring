@@ -155,8 +155,14 @@ class MainWindow(Frame):
 
     
     def sendUpdate(self):
-        pass
-    
+        self.status_string.set("Skickar data, var god vänta på bekräftelse...")
+        m = ''
+        m += 'setMinTemp ' + mw.min_temp.get() + '\n'
+        m += 'setMaxTemp ' +mw.max_temp.get() + '\n'
+        m += 'radiatorControl ' + str(bool(mw.radiator.get())) + '\n'
+        m += 'heatCordControl ' + str(bool(mw.heatcord.get())) + '\n'
+        m += 'extraControl ' + str(bool(mw.extra.get()))
+        print(m)
     def getStatus(self):
         self.status_string.set("Hämtar data, var god vänta...")
         mailh.sendEmail('getStatus True\n','tarendo','tarendo','system')
@@ -165,7 +171,6 @@ class MainWindow(Frame):
         
     def checkUpdates(self):
         text = None
-#        while text == None:
         text = mailh.read_email_from_gmail('GUI')
         if text != None:
             commands = mailh.decodeMail(text)
