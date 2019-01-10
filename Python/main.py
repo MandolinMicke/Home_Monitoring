@@ -279,24 +279,9 @@ if __name__ == '__main__':
     
     
     main = runner('statusfile.yaml')
-#    main.checktemp()
-#    main.run()
-    main.sendStatus()
-    
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
-    
-    
-    # f.close()
-    # main.ardu.close()
-    
-#ardu = ArduConnection()
-#time.sleep(2)
-#print(ardu.getTemperature())
-        
-        
-#ardu = ArduConnection()
-#ardu.close()        
+
+    main.run()
+
+
         
         
