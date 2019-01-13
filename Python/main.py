@@ -208,8 +208,8 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     
     logger.addFilter(my_filter)
-#    logfile = '/home/pi/local/Home_Monitoring/logfile.log'
-    logfile = 'D:/Tärendö/Home_Monitoring/logfile.log'
+    logfile = '/home/pi/local/Home_Monitoring/logfile.log'
+#    logfile = 'D:/Tärendö/Home_Monitoring/logfile.log'
     fh = logging.FileHandler(logfile)
     
     fh.setLevel(logging.DEBUG)
