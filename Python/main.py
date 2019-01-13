@@ -5,7 +5,7 @@ Created on Fri Dec 21 09:04:48 2018
 @author: Mikael
 """
 
-#from serial import Serial
+#
 
 import schedule
 from datetime import datetime as dt
@@ -14,7 +14,7 @@ import time
 import mail_handler as mailh
 
 import yaml
-
+import ArduinoConnection as AC
 
 class NoRunningFilter(logging.Filter):
     def filter(self, record):
@@ -25,59 +25,7 @@ def gts():
     retstr = '\t' + str(n.year) + '-' + str(n.month)  + '-' + str(n.day)  + ':' + str(n.hour) + ':' + str(n.minute) + ' - ' 
             
     return retstr
-
-
-class ArduConnection:
-    def __init__(self,inpport = 'COM5'):
-        # self.ser = Serial(port=inpport)
-        logger.info(gts() + ' connected made to arduino.')
-        
-    def sendAndRecive(self,message):
-        self.send(message)
-        return self.read()
-
-    def read(self):
-        retstr = ''
-        while retstr == '':
-            retstr = self.ser.readline().decode().strip()
-        return retstr
-
-    def send(self,msg):
-        self.ser.write(msg.encode())
-
-    def close(self):
-        self.ser.close()
-
-    def getPipeTemperature(self):
-        return float(self.sendAndRecive('pipetemperature'))
-
-    def getRoomTemperature(self):
-        return float(self.sendAndRecive('roomtemperature'))
-
-    def getRoomHumidity(self):
-        return float(self.sendAndRecive('humidity'))
-
-    def turnCellarRadiatorOn(self):
-        logger.info('radiator turned on')
-    
-    def turnCellarRadiatorOff(self):
-        logger.info('radiator turned off')
-    
-    def turnHeatCordOn(self):
-        logger.info('heat cord turned on')
-
-    def turnHeatCordOff(self):
-        logger.info('heat cord turned off')
-
-    def turnExtraOn(self):
-        logger.info('heat extra on')
-
-    def turnExtraOff(self):
-        logger.info('heat extra off')
-        
-        
-        
-        
+                
 class StatusFileHandler:
     def __init__(self, statusfile):
         self.statusfile = statusfile
@@ -96,20 +44,19 @@ class runner:
     def __init__(self,statusfile):
         self.status = StatusFileHandler(statusfile)
         
-        # self.ardu = ArduConnection()
+        self.ardu = AC.ArduConnection()
         time.sleep(2)
-
 
         self.roomtemp = 20
         self.pipetemp = 23
         self.humid = 100
         self.fejk = False
         
-#        self.getStatus()
-        self.getfejkstatus()
+        self.getStatus()
+#        self.getfejkstatus()
         
         self.startup()
-        schedule.every(5).seconds.do(lambda: self.hourlycheck())
+        schedule.every().hour.do(lambda: self.hourlycheck())
         schedule.every(3).seconds.do(lambda: self.checkMail())
 
         
@@ -144,14 +91,12 @@ class runner:
             
 
     def hourlycheck(self):
-        # self.getStatus()
-        self.getfejkstatus()
+        self.getStatus()
+#        self.getfejkstatus()
         logger.info(gts() +'pipe temperature: ' + str(self.pipetemp) + ', room temparature: ' + str(self.roomtemp) + ', humidity: ' + str(self.humid))
         self.radiatorControl()
 
     def radiatorControl(self):
-#        print(self.roomtemp)
-#        print(self.status.data['radiator'])
 
         if (self.roomtemp < self.status.data['min_temp']) and not self.status.data['radiator']:
             self.turnRadiatorOn()
@@ -160,38 +105,32 @@ class runner:
 
     def turnRadiatorOn(self):
         logger.info(gts() + 'Turning on radiator')
-        # self.ardu.turnCellarRadiatorOn()
-#        self.sendEmail('Turning on Radiator')
+        self.ardu.turnCellarRadiatorOn()
         self.status.setData('radiator', True)
         
     def turnRadiatorOff(self):
         logger.info('Turning off radiator')
-        # self.ardu.turnCellarRadiatorOff()
-#        self.sendEmail('Turning off Radiator')
+        self.ardu.turnCellarRadiatorOff()
         self.status.setData('radiator', False)
     
     def turnHeatCordOn(self):
         logger.info('Turning on heat cord')
-        # self.ardu.turnHeatCordOn()
-#        self.sendEmail('Turning off Heat Cord')
+        self.ardu.turnHeatCordOn()
         self.status.setData('heat_cord', True)
     
     def turnHeatCordOff(self):
         logger.info('Turning on heat cord')
-        # self.ardu.turnHeatCordOn()
-#        self.sendEmail('Turning off Heat Cord')
+        self.ardu.turnHeatCordOn()
         self.status.setData('heat_cord', False)
         
     def turnExtraOn(self):
         logger.info('Turning on heat cord')
-        # self.ardu.turnExtraOn()
-#        self.sendEmail('Turning off Extra')
+        self.ardu.turnExtraOn()
         self.status.setData('extra', True)
     
     def turnExtraOff(self):
         logger.info('Turning on heat cord')
-        # self.ardu.turnExtraOff()
-#        self.sendEmail('Turning off Extra')
+        self.ardu.turnExtraOff()
         self.status.setData('extra', False)
         
         
@@ -215,24 +154,24 @@ class runner:
             if commands != None:
                 self.executeCommands(commands)
 
+            # always send status after an email is recived???
+            self.getStatus()
+#            self.getfejkstatus()
+            self.sendStatus()
     def executeCommands(self,commands):
         for k, value in commands.items():
             if k == 'setMinTemp':
                 self.status.setData('min_temp',float(value))
             elif k == 'setMaxTemp':
                 self.status.setData('max_temp',float(value))
-            elif k == 'getStatus':
-#                self.getStatus()
-                self.sendStatus()
-                
             elif k == 'getTemp':
-                # self.getStatus()
+                self.getStatus()
                 self.sendEmail('somestuffs')
             elif k == 'radiatorControl':
                 if value == 'True':
                     self.turnRadiatorOn()
                 else:
-                    self.turnRadiatorOff()    
+                    self.turnRadiatorOff()
             elif k == 'heatCordControl':
                 if value == 'True':
                     self.turnHeatCordOn()
@@ -269,8 +208,8 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     
     logger.addFilter(my_filter)
-    logfile = '/home/pi/local/Home_Monitoring/logfile.log'
-#    logfile = 'D:/Tärendö/Home_Monitoring/logfile.log'
+#    logfile = '/home/pi/local/Home_Monitoring/logfile.log'
+    logfile = 'D:/Tärendö/Home_Monitoring/logfile.log'
     fh = logging.FileHandler(logfile)
     
     fh.setLevel(logging.DEBUG)
