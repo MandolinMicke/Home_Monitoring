@@ -120,7 +120,7 @@ class runner:
     
     def turnHeatCordOff(self):
         logger.info('Turning on heat cord')
-        self.ardu.turnHeatCordOn()
+        self.ardu.turnHeatCordOff()
         self.status.setData('heat_cord', False)
         
     def turnExtraOn(self):
@@ -151,13 +151,21 @@ class runner:
         text = mailh.read_email_from_gmail('system')
         if text != None:
             commands = mailh.decodeMail(text)
+            print(commands)
             if commands != None:
-                self.executeCommands(commands)
+                if commands == 'FAIL':
+                    print(commands)
+                    logger.info(gts() + 'Could not connect to mail')
+                else:
+                    self.executeCommands(commands)
 
             # always send status after an email is recived???
             self.getStatus()
 #            self.getfejkstatus()
-            self.sendStatus()
+            if commands != 'FAIL':
+                self.sendStatus()
+
+
     def executeCommands(self,commands):
         for k, value in commands.items():
             if k == 'setMinTemp':

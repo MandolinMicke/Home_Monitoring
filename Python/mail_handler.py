@@ -8,11 +8,12 @@ import email
 import email.header
 #import datetime
 
-
+import time
 import mailcreds as mc
 
 import std_cmd as sc
 
+from ssl import SSLEOFError as ssler
 SMTP_SERVER = "imap.gmail.com"
 SMTP_PORT   = 993
 
@@ -26,11 +27,14 @@ SMTP_PORT   = 993
 # ------------------------------------------------
 
 def read_email_from_gmail(subject = None, user = 'tarendo'):
-    while True:
-        mail = imaplib.IMAP4_SSL(SMTP_SERVER)
-        mail.login(mc.EMAIL[user],mc.PWD[user])
-
+    tries = 0
+    rettext = None
+    while tries <10:
         try:    
+            mail = imaplib.IMAP4_SSL(SMTP_SERVER)
+            mail.login(mc.EMAIL[user],mc.PWD[user])
+
+        
             # Out: list of "folders" aka labels in gmail.
             mail.select("inbox") # connect to inbox.
         
@@ -52,7 +56,10 @@ def read_email_from_gmail(subject = None, user = 'tarendo'):
             else:
                 rettext = None
             
-        except imaplib.abort:
+        except (imaplib.IMAP4.abort, imaplib.IMAP4.error,ssler):
+            time.sleep(1)
+            tries += 10
+            rettext = 'FAIL'
             continue
         mail.logout()
 #        mail.close()
