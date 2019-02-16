@@ -153,16 +153,13 @@ class runner:
             commands = mailh.decodeMail(text)
             print(commands)
             if commands != None:
-                if commands == 'FAIL':
-                    print(commands)
-                    logger.info(gts() + 'Could not connect to mail')
-                else:
-                    self.executeCommands(commands)
+                self.executeCommands(commands)
 
             # always send status after an email is recived???
-            self.getStatus()
+            
 #            self.getfejkstatus()
-            if commands != 'FAIL':
+            if 'FAIL' not in commands:
+                self.getStatus()
                 self.sendStatus()
 
 
@@ -194,6 +191,8 @@ class runner:
                 pass
             elif k == 'getLastMonthData':
                 pass
+            elif k == 'FAIL':
+                logger.info(gts() + 'Could not connect to mail')
             else:
                 print('unknown command')
     

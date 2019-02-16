@@ -68,18 +68,21 @@ def read_email_from_gmail(subject = None, user = 'tarendo'):
 
 def decodeMail(text):
     retcommands = {}
-    for i in text:
-        stringlist = i.split('\n')
-        if stringlist[0].strip() == 'History':
-            retcommands = []
-            del(stringlist[0])
-            for s in stringlist:
-                retcommands.append(s.strip())
-        else:
-            for s in stringlist:
-                if any([x in s for x in sc.systemcommands]):
-                    strs = s.strip().split(' ')
-                    retcommands[strs[0]] = strs[1]
+    if text == 'FAIL':
+        retcommands['FAIL'] = 'FAIL'
+    else:
+        for i in text:
+            stringlist = i.split('\n')
+            if stringlist[0].strip() == 'History':
+                retcommands = []
+                del(stringlist[0])
+                for s in stringlist:
+                    retcommands.append(s.strip())
+            else:
+                for s in stringlist:
+                    if any([x in s for x in sc.systemcommands]):
+                        strs = s.strip().split(' ')
+                        retcommands[strs[0]] = strs[1]
     return retcommands
 
 
