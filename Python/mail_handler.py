@@ -56,7 +56,7 @@ def read_email_from_gmail(subject = None, user = 'tarendo'):
             else:
                 rettext = None
             
-        except (imaplib.IMAP4.abort, imaplib.IMAP4.error,ssler):
+        except (imaplib.IMAP4.abort, imaplib.IMAP4.error,ssler,OSError):
             time.sleep(1)
             tries += 10
             rettext = 'FAIL'
