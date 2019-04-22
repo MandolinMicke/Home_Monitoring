@@ -29,7 +29,7 @@ def gts():
 class StatusFileHandler:
     def __init__(self, statusfile):
         self.statusfile = statusfile
-        with open(statusfile) as f:
+        with open(self.statusfile) as f:
             self.data = yaml.load(f)
     
     def SaveStatus(self):       
@@ -39,6 +39,36 @@ class StatusFileHandler:
     def setData(self, keyword, value):
         self.data[keyword] = value
         self.SaveStatus()
+
+def getDataFromLoggfile(file,timespan = 'week'):
+    if timespan == 'week':
+        wanteddate = dt.datetime.now() - dt.timedelta(days=7)
+    elif timespan == 'month':
+        wanteddate = dt.datetime.now() - dt.timedelta(days=30)
+    elif timespan == 'threemonts':
+        wanteddate = dt.datetime.now() - dt.timedelta(days=90)
+    elif timespan == 'halfyear':
+        wanteddate = dt.datetime.now() - dt.timedelta(days=180)
+    elif timespan == 'year':
+        wanteddate = dt.datetime.now() - dt.timedelta(days=180)
+    else:
+        wanteddate = dt.datetime.now() - dt.timedelta(days=7)
+    with open(file,'r') as f:
+        retlist =[]
+        for line in f.readlines():
+            if 'HourlyStatus' in line:
+                linedata = line.split(' ')
+                date = linedata[1].split('-')
+                curtime = dt.datetime(int(date[0]),int(date[1]),int(date[2].split(':')[0]),int(date[2].split(':')[1]),int(date[2].split(':')[2]))
+                tmpdata = []
+                if (curtime > wanteddate):
+                    tmpdata.append(curtime)
+                    tmpdata.append(float(linedata[5].strip(',')))
+                    tmpdata.append(float(linedata[8].strip(',')))
+                    tmpdata.append(float(linedata[10].strip('\n')))
+                    retlist.append(tmpdata)
+                    
+    return retlist
 
 class runner:
     def __init__(self,statusfile):
@@ -93,7 +123,7 @@ class runner:
     def hourlycheck(self):
         self.getStatus()
 #        self.getfejkstatus()
-        logger.info(gts() +'pipe temperature: ' + str(self.pipetemp) + ', room temparature: ' + str(self.roomtemp) + ', humidity: ' + str(self.humid))
+        logger.info('HourlyStatus: ' + gts() +'pipe temperature: ' + str(self.pipetemp) + ', room temparature: ' + str(self.roomtemp) + ', humidity: ' + str(self.humid))
         self.radiatorControl()
 
     def radiatorControl(self):
@@ -109,27 +139,27 @@ class runner:
         self.status.setData('radiator', True)
         
     def turnRadiatorOff(self):
-        logger.info('Turning off radiator')
+        logger.info(gts() + 'Turning off radiator')
         self.ardu.turnCellarRadiatorOff()
         self.status.setData('radiator', False)
     
     def turnHeatCordOn(self):
-        logger.info('Turning on heat cord')
+        logger.info(gts() + 'Turning on heat cord')
         self.ardu.turnHeatCordOn()
         self.status.setData('heat_cord', True)
     
     def turnHeatCordOff(self):
-        logger.info('Turning on heat cord')
+        logger.info(gts() + 'Turning on heat cord')
         self.ardu.turnHeatCordOff()
         self.status.setData('heat_cord', False)
         
     def turnExtraOn(self):
-        logger.info('Turning on heat cord')
+        logger.info(gts() + 'Turning on heat cord')
         self.ardu.turnExtraOn()
         self.status.setData('extra', True)
     
     def turnExtraOff(self):
-        logger.info('Turning on heat cord')
+        logger.info(gts() + 'Turning on heat cord')
         self.ardu.turnExtraOff()
         self.status.setData('extra', False)
         
@@ -145,6 +175,16 @@ class runner:
         m += 'room_temp ' + str(self.roomtemp) + '\n'
         m += 'pipe_temp ' + str(self.pipetemp) + '\n'
         m += 'humidity ' + str(self.humid) + '\n'
+        self.sendEmail(m)
+        
+    def sendHistory(self,span='week'):
+        data = getDataFromLoggfile(logger.handlers[0].baseFilename,span)
+        m = 'History\n'
+        for d in data:
+            m += str(d[0]) +';'
+            m += str(d[1]) +';'
+            m += str(d[2]) +';'
+            m += str(d[3]) +'\n'
         self.sendEmail(m)
         
     def checkMail(self):
