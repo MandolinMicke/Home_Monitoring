@@ -34,8 +34,9 @@ def serial_ports():
             result.append(port)
         except (OSError, SerialException):
             pass
-    return result
 
+#    return result
+    return '/dev/serial0'
 
 
 class ArduConnection:
@@ -43,7 +44,7 @@ class ArduConnection:
         if inpport == None:
             ports = serial_ports()
             inpport = ports[0]
-        self.ser = Serial(port=inpport)
+        self.ser = Serial('/dev/serial0',9600,timeout = 1)
 
     def sendAndRecive(self,message):
         self.send(message)

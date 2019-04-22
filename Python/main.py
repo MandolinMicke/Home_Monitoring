@@ -56,7 +56,7 @@ class runner:
 #        self.getfejkstatus()
         
         self.startup()
-        schedule.every().hour.do(lambda: self.hourlycheck())
+        schedule.every().minute.do(lambda: self.hourlycheck())
         schedule.every(3).seconds.do(lambda: self.checkMail())
 
         
