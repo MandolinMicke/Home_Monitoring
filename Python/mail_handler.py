@@ -92,7 +92,7 @@ def sendEmail(body,fromaddr,toaddr,subject):
     to = [mc.EMAIL[toaddr]]
 
     try:  
-        message = 'Subject: {}\n\n{}'.format(subject, body)   
+        message = 'Subject: {}\n\n{}'.format(subject, body)
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.ehlo()
         server.login(mc.EMAIL[fromaddr],mc.PWD[fromaddr])
