@@ -16,6 +16,9 @@ import mail_handler as mailh
 import yaml
 import ArduinoConnection as AC
 
+from StatusFileHandler import StatusFileHandler
+
+
 class NoRunningFilter(logging.Filter):
     def filter(self, record):
         return not record.msg.startswith('Running job')
@@ -25,20 +28,7 @@ def gts():
     retstr = '\t' + str(n.year) + '-' + str(n.month)  + '-' + str(n.day)  + ':' + str(n.hour) + ':' + str(n.minute) + ' - ' 
             
     return retstr
-                
-class StatusFileHandler:
-    def __init__(self, statusfile):
-        self.statusfile = statusfile
-        with open(self.statusfile) as f:
-            self.data = yaml.load(f)
-    
-    def SaveStatus(self):       
-        with open(self.statusfile,'w+') as file:
-            yaml.dump(self.data,file,allow_unicode = True,encoding = 'utf-8',default_flow_style = False)
-        
-    def setData(self, keyword, value):
-        self.data[keyword] = value
-        self.SaveStatus()
+
 
 def getDataFromLoggfile(file,timespan = 'week'):
     if timespan == 'week':
