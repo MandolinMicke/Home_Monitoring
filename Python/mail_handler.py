@@ -62,7 +62,6 @@ def read_email_from_gmail(subject = None, user = 'tarendo'):
             rettext = 'FAIL'
             continue
         mail.logout()
-#        mail.close()
         break
     return rettext
 
@@ -89,7 +88,9 @@ def decodeMail(text):
 def sendEmail(body,fromaddr,toaddr,subject):
 
     sent_from = mc.EMAIL[fromaddr]
-    to = [mc.EMAIL[toaddr]]
+    to = []
+    for t in mc.EMAIL[toaddr]:
+        to.append(t)
 
     try:  
         message = 'Subject: {}\n\n{}'.format(subject, body)
@@ -101,12 +102,14 @@ def sendEmail(body,fromaddr,toaddr,subject):
         print('Email sent!')
     except:  
         print('Something went wrong...')
+
 if __name__ == '__main__':
-     text = read_email_from_gmail('GUI', 'tarendo')
+    text = read_email_from_gmail('GUI', 'tarendo')
 #     print(text)
-     if text != None:
-         print(decodeMail(text))
-#    sendEmail('hej hopp','tarendo','system')
+#     if text != None:
+#         print(decodeMail(text))
+    
+    sendEmail('hej hopp','tarendo','users','test')
 
 
 

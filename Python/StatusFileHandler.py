@@ -27,7 +27,6 @@ class StatusFileHandler:
             
         if not all([x in self.data for x in list(standardyaml.keys())]):
             self.data = standardyaml
-#            mailh.sendEmail('Hej \n Systemet har startats om och statusen från innan var korrupt. \n Logga in och kolla så allt är som du vill.', 'tarendo', 'users', 'Tillsyn krävs i Tärendö')
             mailh.sendEmail('Hello. During reboot something went wrong with the previous status, please check that everything checks out.', 'tarendo', 'users', 'Survailance is needed.')
             
     
