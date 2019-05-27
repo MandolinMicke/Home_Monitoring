@@ -89,10 +89,16 @@ def sendEmail(body,fromaddr,toaddr,subject):
 
     sent_from = mc.EMAIL[fromaddr]
     to = []
-    for t in mc.EMAIL[toaddr]:
-        to.append(t)
-
-    try:  
+    
+    if type(mc.EMAIL[toaddr]) == str:
+        to.append(mc.EMAIL[toaddr])    
+    else:
+        for t in mc.EMAIL[toaddr]:
+            to.append(t)
+    
+#    try:  
+        
+    if True:
         message = 'Subject: {}\n\n{}'.format(subject, body)
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.ehlo()
@@ -100,8 +106,8 @@ def sendEmail(body,fromaddr,toaddr,subject):
         server.sendmail(sent_from, to, message)
         server.close()
         print('Email sent!')
-    except:  
-        print('Something went wrong...')
+#    except:  
+#        print('Something went wrong...')
 
 if __name__ == '__main__':
     text = read_email_from_gmail('GUI', 'tarendo')
@@ -109,7 +115,7 @@ if __name__ == '__main__':
 #     if text != None:
 #         print(decodeMail(text))
     
-    sendEmail('hej hopp','tarendo','users','test')
+    sendEmail('hej hopp','tarendo','tarendo','test')
 
 
 
