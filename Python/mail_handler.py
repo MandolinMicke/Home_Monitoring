@@ -116,7 +116,7 @@ if __name__ == '__main__':
 #     if text != None:
 #         print(decodeMail(text))
     
-#    sendEmail('hej hopp','tarendo','tarendo','test')
+    sendEmail('hej hopp','tarendo','users','test')
 
 
 

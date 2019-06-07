@@ -87,7 +87,7 @@ class runner:
         
         # inform that the system has been rebooted
         logger.info(gts() + ' The system has been restarted.')
-        self.sendEmail('The system has been rebooted', 'user','Update')
+        self.sendEmail('The system has been rebooted', 'users','Update')
         
     def startup(self):
         # resets the previous status of the system
@@ -125,7 +125,7 @@ class runner:
             self.sendEmail('The Radiator has been turned on due to low temperature.', 'user','Update')
         elif (self.roomtemp > self.status.data['max_temp']) and self.status.data['radiator']:
             self.turnRadiatorOff()
-            self.sendEmail('The Radiator has been turned off due to high temperature.', 'user','Update')
+            self.sendEmail('The Radiator has been turned off due to high temperature.', 'users','Update')
 
     def turnRadiatorOn(self):
         # turn on radiator
