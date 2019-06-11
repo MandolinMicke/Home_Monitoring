@@ -40,7 +40,7 @@ def getDataFromLoggfile(file,timespan = 'week'):
     elif timespan == 'halfyear':
         wanteddate = dt.datetime.now() - dt.timedelta(days=180)
     elif timespan == 'year':
-        wanteddate = dt.datetime.now() - dt.timedelta(days=180)
+        wanteddate = dt.datetime.now() - dt.timedelta(days=365)
     else:
         wanteddate = dt.datetime.now() - dt.timedelta(days=7)
     with open(file,'r') as f:
@@ -211,16 +211,14 @@ class runner:
                 if value == 'True':
                     self.turnHeatCordOn()
                 else:
-                    self.turnHeatCordOff()    
+                    self.turnHeatCordOff()
             elif k == 'extraControl':
                 if value == 'True':
                     self.turnExtraOn()
                 else:
-                    self.turnExtraOff()    
-            elif k == 'getLastWeeksData':
-                pass
-            elif k == 'getLastMonthData':
-                pass
+                    self.turnExtraOff()
+            elif k == 'getHistory':
+                self.sendHistory(value)
             elif k == 'FAIL':
                 logger.info(gts() + 'Could not connect to mail')
             else:
