@@ -203,7 +203,8 @@ class runner:
                 self.executeCommands(commands)
 
             # if the email read didn't fail, send status
-            if ['FAIL', 'getHistory'] not in commands:
+            if not any([x in commands for x in ['FAIL', 'getHistory']]):
+                print(any([x not in commands for x in ['FAIL', 'getHistory']]))
                 self.getStatus()
                 self.sendStatus()
 
