@@ -3,6 +3,7 @@
 #import sys
 import imaplib
 import smtplib
+import socket
 
 import email
 import email.header
@@ -17,7 +18,8 @@ from ssl import SSLEOFError as ssler
 SMTP_SERVER = "imap.gmail.com"
 SMTP_PORT   = 993
 
-
+# change timeout
+socket.setdefaulttimeout(10)
 
 
 # -------------------------------------------------
@@ -27,42 +29,39 @@ SMTP_PORT   = 993
 # ------------------------------------------------
 
 def read_email_from_gmail(subject = None, user = 'tarendo'):
-    tries = 0
     rettext = None
-    while tries <10:
-        try:    
-            mail = imaplib.IMAP4_SSL(SMTP_SERVER)
-            mail.login(mc.EMAIL[user],mc.PWD[user])
 
-        
-            # Out: list of "folders" aka labels in gmail.
-            mail.select("inbox") # connect to inbox.
-        
-            # Get all unread emails
-            if subject == None:
-                typ, msg_num = mail.search(None,'(UNSEEN)')
-            else:
-                typ, msg_num = mail.search(None,'(UNSEEN SUBJECT "' + subject + ' ")')
-                
-            # check if a new mail is here and get the text
-            if msg_num[0].decode().split(' ')[0]:
-                rettext = []
-                for num in msg_num[0].decode().split(' '):
-                    result, data = mail.fetch(num.encode(), '(RFC822)')
-                    raw_email = data[0][1].decode()
-                    email_message = email.message_from_string(raw_email)
-                    mejltext = email_message.get_payload()
-                    rettext.append(mejltext)
-            else:
-                rettext = None
+    try:    
+        mail = imaplib.IMAP4_SSL(SMTP_SERVER)
+        mail.login(mc.EMAIL[user],mc.PWD[user])
+
+    
+        # Out: list of "folders" aka labels in gmail.
+        mail.select("inbox") # connect to inbox.
+    
+        # Get all unread emails
+        if subject == None:
+            typ, msg_num = mail.search(None,'(UNSEEN)')
+        else:
+            typ, msg_num = mail.search(None,'(UNSEEN SUBJECT "' + subject + ' ")')
             
-        except (imaplib.IMAP4.abort, imaplib.IMAP4.error,ssler,OSError):
-            time.sleep(1)
-            tries += 10
-            rettext = 'FAIL'
-            continue
-        mail.logout()
-        break
+        # check if a new mail is here and get the text
+        if msg_num[0].decode().split(' ')[0]:
+            rettext = []
+            for num in msg_num[0].decode().split(' '):
+                result, data = mail.fetch(num.encode(), '(RFC822)')
+                raw_email = data[0][1].decode()
+                email_message = email.message_from_string(raw_email)
+                mejltext = email_message.get_payload()
+                rettext.append(mejltext)
+        else:
+            rettext = None
+        
+    except (imaplib.IMAP4.abort, imaplib.IMAP4.error,ssler,OSError):
+        time.sleep(1)
+        rettext = 'FAIL'
+    mail.logout()
+        
     return rettext
 
 def decodeMail(text):
@@ -110,12 +109,14 @@ def sendEmail(body,fromaddr,toaddr,subject):
 #        print('Something went wrong...')
 
 if __name__ == '__main__':
-    text = read_email_from_gmail('GUI', 'tarendo')
-#     print(text)
+    for i in range(1):
+        text = read_email_from_gmail('system', 'tarendo')
+        print(text)
+
 #     if text != None:
 #         print(decodeMail(text))
     
-    sendEmail('hej hopp','tarendo','tarendo','test')
+    sendEmail('hej hopp','tarendo','users','test')
 
 
 

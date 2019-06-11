@@ -20,10 +20,12 @@ from StatusFileHandler import StatusFileHandler
 
 
 class NoRunningFilter(logging.Filter):
+    # class to keep logger from logging unimportant things.
     def filter(self, record):
         return not record.msg.startswith('Running job')
 
 def gts():
+    # help function to create string for date and time
     n = dt.now()
     retstr = '\t' + str(n.year) + '-' + str(n.month)  + '-' + str(n.day)  + ':' + str(n.hour) + ':' + str(n.minute) + ' - ' 
             
@@ -62,112 +64,125 @@ def getDataFromLoggfile(file,timespan = 'week'):
 
 class runner:
     def __init__(self,statusfile):
+        # get the previous status during startup
         self.status = StatusFileHandler(statusfile)
         
+        # start serial connection to arduino
         self.ardu = AC.ArduConnection()
         time.sleep(2)
-
-        self.roomtemp = 20
-        self.pipetemp = 23
-        self.humid = 100
-        self.fejk = False
         
+        # set dummy values for 
+        self.roomtemp = 0
+        self.pipetemp = 0
+        self.humid = 0
+        
+        # measure the values
         self.getStatus()
-#        self.getfejkstatus()
-        
+
+        # reset the initial status
         self.startup()
         schedule.every().hour.do(lambda: self.hourlycheck())
         schedule.every(3).seconds.do(lambda: self.checkMail())
 
         
-        
+        # inform that the system has been rebooted
         logger.info(gts() + ' The system has been restarted.')
-#        self.sendEmail('Systemet har startats', 'user','Uppdatering Från Tärendö')
+        self.sendEmail('The system has been rebooted', 'users','Update')
         
     def startup(self):
+        # resets the previous status of the system
+
+        # reset radiator
         if self.status.data['radiator'] or (self.roomtemp < self.status.data['min_temp']):
             self.turnRadiatorOn()
         else:
             self.turnRadiatorOff()
-        
+        # reset heat cord
         if self.status.data['heat_cord']:
             self.turnHeatCordOn()
         else:
             self.turnHeatCordOff()
-            
+        # reset the extra plug
         if self.status.data['extra']:
             self.turnExtraOn()
         else:
             self.turnExtraOff()
 
-    def getfejkstatus(self):
-        if self.roomtemp <4 or self.fejk:
-            self.roomtemp += 1
-            self.fejk = True
-            if self.roomtemp >20:
-                self.fejk = False
-        else:
-            self.roomtemp -= 1        
-            
+
 
     def hourlycheck(self):
+        # hourly check of the system
+        # get status and update logfile
         self.getStatus()
-#        self.getfejkstatus()
         logger.info('HourlyStatus: ' + gts() +'pipe temperature: ' + str(self.pipetemp) + ', room temparature: ' + str(self.roomtemp) + ', humidity: ' + str(self.humid))
+        # check if the temperature is low/ high enough to change the radiator settings
         self.radiatorControl()
 
     def radiatorControl(self):
-
+        # control radiator depending on temperature and send update
         if (self.roomtemp < self.status.data['min_temp']) and not self.status.data['radiator']:
             self.turnRadiatorOn()
+            self.sendEmail('The Radiator has been turned on due to low temperature.', 'user','Update')
         elif (self.roomtemp > self.status.data['max_temp']) and self.status.data['radiator']:
             self.turnRadiatorOff()
+            self.sendEmail('The Radiator has been turned off due to high temperature.', 'users','Update')
 
     def turnRadiatorOn(self):
+        # turn on radiator
         logger.info(gts() + 'Turning on radiator')
         self.ardu.turnCellarRadiatorOn()
         self.status.setData('radiator', True)
         
     def turnRadiatorOff(self):
+        # turn of radiator
         logger.info(gts() + 'Turning off radiator')
         self.ardu.turnCellarRadiatorOff()
         self.status.setData('radiator', False)
     
     def turnHeatCordOn(self):
+        # turn on heat cord
         logger.info(gts() + 'Turning on heat cord')
         self.ardu.turnHeatCordOn()
         self.status.setData('heat_cord', True)
     
     def turnHeatCordOff(self):
+        # turn off heat cord
         logger.info(gts() + 'Turning on heat cord')
         self.ardu.turnHeatCordOff()
         self.status.setData('heat_cord', False)
         
     def turnExtraOn(self):
-        logger.info(gts() + 'Turning on heat cord')
+        # turn extra plug on
+        logger.info(gts() + 'Turning on extra plug')
         self.ardu.turnExtraOn()
         self.status.setData('extra', True)
     
     def turnExtraOff(self):
-        logger.info(gts() + 'Turning on heat cord')
+        # turn extra plug off
+        logger.info(gts() + 'Turning off extra plug')
         self.ardu.turnExtraOff()
         self.status.setData('extra', False)
         
         
     def sendEmail(self,message,to = 'tarendo',subject = 'GUI'):
-        
+        # generic email sender
         mailh.sendEmail(message, 'tarendo', to, subject)
 
     def sendStatus(self):
+        # send status update
         m = ''
+        # current status 
         for k in self.status.data.keys():
             m += k + ' ' + str(self.status.data[k]) + '\n'
+        # current temperature and humidity
         m += 'room_temp ' + str(self.roomtemp) + '\n'
         m += 'pipe_temp ' + str(self.pipetemp) + '\n'
         m += 'humidity ' + str(self.humid) + '\n'
+        # send the email
         self.sendEmail(m)
         
     def sendHistory(self,span='week'):
+        # send the history data
         data = getDataFromLoggfile(logger.handlers[0].baseFilename,span)
         m = 'History\n'
         for d in data:
@@ -178,16 +193,16 @@ class runner:
         self.sendEmail(m)
         
     def checkMail(self):
+        # check email in case of request from user
         text = mailh.read_email_from_gmail('system')
+        # if a responce is found, decode the email
         if text != None:
             commands = mailh.decodeMail(text)
-            print(commands)
+            # if the email contains information, run all commands
             if commands != None:
                 self.executeCommands(commands)
 
-            # always send status after an email is recived???
-            
-#            self.getfejkstatus()
+            # if the email read didn't fail, send status
             if 'FAIL' not in commands:
                 self.getStatus()
                 self.sendStatus()
@@ -200,6 +215,7 @@ class runner:
             elif k == 'setMaxTemp':
                 self.status.setData('max_temp',float(value))
             elif k == 'getTemp':
+                # not used atm
                 self.getStatus()
                 self.sendEmail('somestuffs')
             elif k == 'radiatorControl':
@@ -225,12 +241,14 @@ class runner:
                 print('unknown command')
     
     def getStatus(self):
+        # measure all temperatures and humidity
         self.roomtemp = self.ardu.getRoomTemperature()
         self.humid = self.ardu.getRoomHumidity()
         self.pipetemp = self.ardu.getPipeTemperature()
         
         
     def run(self):
+        # run schedule
         while True:
             schedule.run_pending()
             time.sleep(1)
