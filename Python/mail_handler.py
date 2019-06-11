@@ -60,8 +60,10 @@ def read_email_from_gmail(subject = None, user = 'tarendo'):
     except (imaplib.IMAP4.abort, imaplib.IMAP4.error,ssler,OSError):
         time.sleep(1)
         rettext = 'FAIL'
-    mail.logout()
-        
+    try:
+        mail.logout()
+    except (UnboundLocalError):
+        pass    
     return rettext
 
 def decodeMail(text):

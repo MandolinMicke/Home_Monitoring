@@ -8,7 +8,7 @@ Created on Fri Dec 21 09:04:48 2018
 #
 
 import schedule
-from datetime import datetime as dt
+import datetime as dt
 import logging
 import time
 import mail_handler as mailh
@@ -26,7 +26,7 @@ class NoRunningFilter(logging.Filter):
 
 def gts():
     # help function to create string for date and time
-    n = dt.now()
+    n = dt.datetime.now()
     retstr = '\t' + str(n.year) + '-' + str(n.month)  + '-' + str(n.day)  + ':' + str(n.hour) + ':' + str(n.minute) + ' - ' 
             
     return retstr
@@ -203,12 +203,13 @@ class runner:
                 self.executeCommands(commands)
 
             # if the email read didn't fail, send status
-            if 'FAIL' not in commands:
+            if ['FAIL', 'getHistory'] not in commands:
                 self.getStatus()
                 self.sendStatus()
 
 
     def executeCommands(self,commands):
+        
         for k, value in commands.items():
             if k == 'setMinTemp':
                 self.status.setData('min_temp',float(value))
@@ -255,7 +256,6 @@ class runner:
         
 if __name__ == '__main__':
     # setup logger
-
     my_filter = NoRunningFilter()
     logger = logging.getLogger('testlog')
     logger.setLevel(logging.DEBUG)

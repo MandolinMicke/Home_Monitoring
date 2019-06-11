@@ -8,8 +8,7 @@ systemcommands = [
 'radiatorControl',
 'heatCordControl',
 'extraControl',
-'getLastWeeksData',
-'getLastMonthData',
+'getHistory',
 ### gui commands
 'extra',
 'heat_cord',
