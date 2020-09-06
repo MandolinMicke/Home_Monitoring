@@ -17,7 +17,7 @@ import yaml
 import ArduinoConnection as AC
 
 from StatusFileHandler import StatusFileHandler
-
+from WifiSockets import WifiSockets
 
 class NoRunningFilter(logging.Filter):
     # class to keep logger from logging unimportant things.
@@ -66,7 +66,7 @@ class runner:
     def __init__(self,statusfile):
         # get the previous status during startup
         self.status = StatusFileHandler(statusfile)
-        
+        self.wifiplug = WifiSockets()
         # start serial connection to arduino
         self.ardu = AC.ArduConnection()
         time.sleep(2)
@@ -130,37 +130,43 @@ class runner:
     def turnRadiatorOn(self):
         # turn on radiator
         logger.info(gts() + 'Turning on radiator')
-        self.ardu.turnCellarRadiatorOn()
+        # self.ardu.turnCellarRadiatorOn()
+        self.wifiplug.turn_on('plug1')
         self.status.setData('radiator', True)
         
     def turnRadiatorOff(self):
         # turn of radiator
         logger.info(gts() + 'Turning off radiator')
-        self.ardu.turnCellarRadiatorOff()
+        # self.ardu.turnCellarRadiatorOff()
+        self.wifiplug.turn_off('plug1')
         self.status.setData('radiator', False)
     
     def turnHeatCordOn(self):
         # turn on heat cord
         logger.info(gts() + 'Turning on heat cord')
-        self.ardu.turnHeatCordOn()
+        # self.ardu.turnHeatCordOn()
+        self.wifiplug.turn_on('plug2')
         self.status.setData('heat_cord', True)
     
     def turnHeatCordOff(self):
         # turn off heat cord
         logger.info(gts() + 'Turning on heat cord')
-        self.ardu.turnHeatCordOff()
+        # self.ardu.turnHeatCordOff()
+        self.wifiplug.turn_off('plug2')
         self.status.setData('heat_cord', False)
         
     def turnExtraOn(self):
         # turn extra plug on
         logger.info(gts() + 'Turning on extra plug')
-        self.ardu.turnExtraOn()
+        # self.ardu.turnExtraOn()
+        self.wifiplug.turn_on('plug3')
         self.status.setData('extra', True)
     
     def turnExtraOff(self):
         # turn extra plug off
         logger.info(gts() + 'Turning off extra plug')
-        self.ardu.turnExtraOff()
+        # self.ardu.turnExtraOff()
+        self.wifiplug.turn_off('plug3')
         self.status.setData('extra', False)
         
         
