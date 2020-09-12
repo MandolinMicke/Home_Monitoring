@@ -53,6 +53,7 @@ def read_email_from_gmail(subject = None, user = 'tarendo'):
                 raw_email = data[0][1].decode()
                 email_message = email.message_from_string(raw_email)
                 mejltext = email_message.get_payload()
+
                 rettext.append(mejltext)
         else:
             rettext = None
@@ -68,11 +69,19 @@ def read_email_from_gmail(subject = None, user = 'tarendo'):
 
 def decodeMail(text):
     retcommands = {}
+    # if isinstance(text[0],list):
+        # text = text[0]
+    print('here')
+    print(text)
+
     if text == 'FAIL':
         retcommands['FAIL'] = 'FAIL'
     else:
-        for i in text:
-            stringlist = i.split('\n')
+        for i in text[0]:
+            print(str(i))
+            if '<div dir=3D' in str(i):
+                continue
+            stringlist = str(i).split('\n')
             if stringlist[0].strip() == 'History':
                 retcommands = []
                 del(stringlist[0])
@@ -113,12 +122,12 @@ def sendEmail(body,fromaddr,toaddr,subject):
 if __name__ == '__main__':
     for i in range(1):
         text = read_email_from_gmail('system', 'tarendo')
-        print(text)
+        # print(text)
 
-#     if text != None:
-#         print(decodeMail(text))
+    if text != None:
+        print(decodeMail(text))
     
-    sendEmail('hej hopp','tarendo','users','test')
+    # sendEmail('hej hopp','tarendo','users','test')
 
 
 
