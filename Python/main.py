@@ -37,9 +37,9 @@ def getDataFromLoggfile(file,timespan = 'week'):
         wanteddate = dt.datetime.now() - dt.timedelta(days=7)
     elif timespan == 'month':
         wanteddate = dt.datetime.now() - dt.timedelta(days=30)
-    elif timespan == 'threemonts':
+    elif timespan == 'three_months':
         wanteddate = dt.datetime.now() - dt.timedelta(days=90)
-    elif timespan == 'halfyear':
+    elif timespan == 'half_year':
         wanteddate = dt.datetime.now() - dt.timedelta(days=180)
     elif timespan == 'year':
         wanteddate = dt.datetime.now() - dt.timedelta(days=365)
@@ -63,10 +63,10 @@ def getDataFromLoggfile(file,timespan = 'week'):
     return retlist
 
 class runner:
-    def __init__(self,statusfile):
+    def __init__(self,statusfile,logger):
         # get the previous status during startup
         self.status = StatusFileHandler(statusfile)
-        
+        self.logger = logger
         # start serial connection to arduino
         self.ardu = AC.ArduConnection()
         time.sleep(2)
@@ -86,7 +86,7 @@ class runner:
 
         
         # inform that the system has been rebooted
-        logger.info(gts() + ' The system has been restarted.')
+        self.logger.info(gts() + ' The system has been restarted.')
         self.sendEmail('The system has been rebooted', 'users','Update')
         
     def startup(self):
@@ -114,7 +114,7 @@ class runner:
         # hourly check of the system
         # get status and update logfile
         self.getStatus()
-        logger.info('HourlyStatus: ' + gts() +'pipe temperature: ' + str(self.pipetemp) + ', room temparature: ' + str(self.roomtemp) + ', humidity: ' + str(self.humid))
+        self.logger.info('HourlyStatus: ' + gts() +'pipe temperature: ' + str(self.pipetemp) + ', room temparature: ' + str(self.roomtemp) + ', humidity: ' + str(self.humid))
         # check if the temperature is low/ high enough to change the radiator settings
         self.radiatorControl()
 
@@ -122,44 +122,44 @@ class runner:
         # control radiator depending on temperature and send update
         if (self.roomtemp < self.status.data['min_temp']) and not self.status.data['radiator']:
             self.turnRadiatorOn()
-            self.sendEmail('The Radiator has been turned on due to low temperature.', 'user','Update')
+            self.sendEmail('The Radiator has been turned on due to low temperature.', 'users','Update')
         elif (self.roomtemp > self.status.data['max_temp']) and self.status.data['radiator']:
             self.turnRadiatorOff()
             self.sendEmail('The Radiator has been turned off due to high temperature.', 'users','Update')
 
     def turnRadiatorOn(self):
         # turn on radiator
-        logger.info(gts() + 'Turning on radiator')
+        self.logger.info(gts() + 'Turning on radiator')
         self.ardu.turnCellarRadiatorOn()
         self.status.setData('radiator', True)
         
     def turnRadiatorOff(self):
         # turn of radiator
-        logger.info(gts() + 'Turning off radiator')
+        self.logger.info(gts() + 'Turning off radiator')
         self.ardu.turnCellarRadiatorOff()
         self.status.setData('radiator', False)
     
     def turnHeatCordOn(self):
         # turn on heat cord
-        logger.info(gts() + 'Turning on heat cord')
+        self.logger.info(gts() + 'Turning on heat cord')
         self.ardu.turnHeatCordOn()
         self.status.setData('heat_cord', True)
     
     def turnHeatCordOff(self):
         # turn off heat cord
-        logger.info(gts() + 'Turning on heat cord')
+        self.logger.info(gts() + 'Turning on heat cord')
         self.ardu.turnHeatCordOff()
         self.status.setData('heat_cord', False)
         
     def turnExtraOn(self):
         # turn extra plug on
-        logger.info(gts() + 'Turning on extra plug')
+        self.logger.info(gts() + 'Turning on extra plug')
         self.ardu.turnExtraOn()
         self.status.setData('extra', True)
     
     def turnExtraOff(self):
         # turn extra plug off
-        logger.info(gts() + 'Turning off extra plug')
+        self.logger.info(gts() + 'Turning off extra plug')
         self.ardu.turnExtraOff()
         self.status.setData('extra', False)
         
@@ -183,7 +183,7 @@ class runner:
         
     def sendHistory(self,span='week'):
         # send the history data
-        data = getDataFromLoggfile(logger.handlers[0].baseFilename,span)
+        data = getDataFromLoggfile(self.logger.handlers[0].baseFilename,span)
         m = 'History\n'
         for d in data:
             m += str(d[0]) +';'
@@ -238,7 +238,7 @@ class runner:
             elif k == 'getHistory':
                 self.sendHistory(value)
             elif k == 'FAIL':
-                logger.info(gts() + 'Could not connect to mail')
+                pass #logger.info(gts() + 'Could not connect to mail')
             else:
                 print('unknown command')
     
