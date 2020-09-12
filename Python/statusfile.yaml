@@ -2,4 +2,4 @@ extra: false
 heat_cord: true
 max_temp: 10
 min_temp: 7
-radiator: false
+radiator: true
