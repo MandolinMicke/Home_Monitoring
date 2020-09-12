@@ -1,5 +1,6 @@
 import pyHS100 as ph
 from itertools import chain
+from time import sleep
 
 ips = {}
 ips['plug1'] = '192.168.8.107'
@@ -12,7 +13,7 @@ class WifiSockets():
     """
 
     def __init__(self,known_ips = ips):
-
+        sleep(60)
         self.plugs = {}
         for name, ip in known_ips.items():
             new_plug = self.get_plug(name,ip)
@@ -53,6 +54,7 @@ class WifiSockets():
         """ sets a plug to be on
 
         """
+#        print(plug)
         if plug in self.plugs:
             self.plugs[plug].turn_on()
 
@@ -60,6 +62,7 @@ class WifiSockets():
         """ sets a plug to be off
 
         """
+        print(plug)
         if plug in self.plugs:
             self.plugs[plug].turn_off()
 

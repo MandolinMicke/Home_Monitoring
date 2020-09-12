@@ -71,14 +71,10 @@ def decodeMail(text):
     retcommands = {}
     # if isinstance(text[0],list):
         # text = text[0]
-    print('here')
-    print(text)
-
     if text == 'FAIL':
         retcommands['FAIL'] = 'FAIL'
     else:
         for i in text[0]:
-            print(str(i))
             if '<div dir=3D' in str(i):
                 continue
             stringlist = str(i).split('\n')
