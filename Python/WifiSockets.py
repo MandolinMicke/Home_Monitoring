@@ -4,7 +4,7 @@ from time import sleep
 
 ips = {}
 ips['plug1'] = '192.168.8.107'
-ips['plug2'] = '192.168.8.108'
+# ips['plug2'] = '192.168.8.108'
 ips['plug3'] = '192.168.8.109'
 
 class WifiSockets():
@@ -13,13 +13,13 @@ class WifiSockets():
     """
 
     def __init__(self,known_ips = ips):
-        sleep(60)
+        sleep(1)
         self.plugs = {}
         for name, ip in known_ips.items():
             new_plug = self.get_plug(name,ip)
             self.plugs[name] = new_plug
             ## TODO:fix when no plug is there
-        
+            print(name)
     def get_plug(self,name,know_ip= None):
         """ gets the plug of that name
 

@@ -1,5 +1,5 @@
-extra: false
+extra: true
 heat_cord: false
-max_temp: 7.0
-min_temp: 4.0
-radiator: false
+max_temp: 6.0
+min_temp: 3.0
+radiator: true

@@ -44,7 +44,7 @@ class ArduConnection:
         if inpport == None:
             ports = serial_ports()
             inpport = ports[0]
-        self.ser = Serial('/dev/serial0',9600,timeout = 1)
+        self.ser = Serial('/dev/ttyAMA0',9600,timeout = 1)
 
     def sendAndRecive(self,message):
         self.send(message)
@@ -91,4 +91,5 @@ class ArduConnection:
         
 
 if __name__ == '__main__':
-    pass
+    ardu = ArduConnection()
+    print(ardu.getPipeTemperature())

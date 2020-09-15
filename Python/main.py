@@ -15,6 +15,7 @@ import mail_handler as mailh
 
 import yaml
 import ArduinoConnection as AC
+import tempmeasure
 
 from StatusFileHandler import StatusFileHandler
 from WifiSockets import WifiSockets
@@ -69,22 +70,23 @@ class runner:
         self.logger = logger
         self.wifiplug = WifiSockets()
         # start serial connection to arduino
-        self.ardu = AC.ArduConnection()
+        # self.ardu = AC.ArduConnection()
+        self.ardu = tempmeasure.TempMeasurment()
         time.sleep(2)
         
         # set dummy values for 
         self.roomtemp = 0
         self.pipetemp = 0
         self.humid = 0
-        
+        print('here')
         # measure the values
         self.getStatus()
-
+        print('hereagain')
         # reset the initial status
         self.startup()
         schedule.every().hour.do(lambda: self.hourlycheck())
         schedule.every(3).seconds.do(lambda: self.checkMail())
-
+        print('should do something now')
         
         # inform that the system has been rebooted
         self.logger.info(gts() + ' The system has been restarted.')
@@ -146,14 +148,14 @@ class runner:
         # turn on heat cord
         self.logger.info(gts() + 'Turning on heat cord')
         # self.ardu.turnHeatCordOn()
-        self.wifiplug.turn_on('plug2')
+        # self.wifiplug.turn_on('plug2')
         self.status.setData('heat_cord', True)
     
     def turnHeatCordOff(self):
         # turn off heat cord
         self.logger.info(gts() + 'Turning on heat cord')
         # self.ardu.turnHeatCordOff()
-        self.wifiplug.turn_off('plug2')
+        # self.wifiplug.turn_off('plug2')
         self.status.setData('heat_cord', False)
         
     def turnExtraOn(self):
